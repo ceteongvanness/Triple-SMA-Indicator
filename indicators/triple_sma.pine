@@ -1,0 +1,12 @@
+//@version=5
+indicator("Triple SMA", overlay=true)
+
+// Calculate SMAs
+sma20 = ta.sma(close, 20)
+sma50 = ta.sma(close, 50)
+sma200 = ta.sma(close, 200)
+
+// Plot SMAs with specified colors
+plot(sma20, color=color.new(#3177e0, 0), linewidth=2, title="SMA 20")  // Blue
+plot(sma50, color=color.new(#ff9800, 0), linewidth=2, title="SMA 50")  // Orange
+plot(sma200, color=color.new(#f44336, 0), linewidth=2, title="SMA 200")  // Red
