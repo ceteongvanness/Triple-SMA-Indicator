@@ -1,0 +1,1 @@
+# Triple-SMA-Indicator
