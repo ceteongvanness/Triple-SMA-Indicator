@@ -44,10 +44,10 @@ The integration script handles:
 
 ## Files Structure
 ```
-├── README.md
-├── triple_sma_strategy.pine    # TradingView Pine Script
-├── strategy.js                 # Capitalize.ai integration code
-└── LICENSE                     # MIT License file
+├── LICENSE             # MIT License file
+├── README.md           # This file
+├── strategy.js         # Capitalize.ai implementation
+└── triple_sma_strategy.pine  # TradingView Pine Script implementation
 ```
 
 ## Setup Instructions
