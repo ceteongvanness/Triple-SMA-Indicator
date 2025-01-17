@@ -10,8 +10,8 @@ strategy("Triple SMA with Capital Management",
     default_qty_value=100)
 
 // Risk Management Parameters
-maxLossPercent = input.float(30, "Maximum Total Loss %", minval=1, maxval=100)
-stopTradingBalance = input.float(5400, "Stop Trading Below Balance", minval=1000, maxval=6000)
+maxLossPercent = input.float(10, "Maximum Total Loss %", minval=1, maxval=100)
+stopTradingBalance = input.float(5400, "Stop Trading Below Balance", minval=1000, maxval=6000)  // 10% drawdown from 6000
 riskPerTrade = input.float(2, "Risk Per Trade %", minval=0.1, maxval=10)
 
 // SMA Calculations
