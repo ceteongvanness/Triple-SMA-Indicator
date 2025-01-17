@@ -1,6 +1,4 @@
 # Triple SMA Trading Strategy with Capital Management
-
-## Overview
 This repository contains a complete trading strategy implementation using Triple Simple Moving Average (SMA) crossover with advanced capital management features. The strategy is implemented in Pine Script for TradingView and includes integration with Capitalize.ai for automated trading execution.
 
 ## Features
