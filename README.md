@@ -1,4 +1,6 @@
 # Triple SMA Trading Strategy with Capital Management
+
+## Overview
 This repository contains a complete trading strategy implementation using Triple Simple Moving Average (SMA) crossover with advanced capital management features. The strategy is implemented in Pine Script for TradingView and includes integration with Capitalize.ai for automated trading execution.
 
 ## Features
@@ -20,8 +22,8 @@ The strategy uses three Simple Moving Averages:
 
 #### Risk Management Parameters
 - Initial Capital: $6,000
-- Maximum Loss: 30%
-- Stop Trading Balance: $4,200
+- Maximum Loss: 10%
+- Stop Trading Balance: $5,400
 - Risk Per Trade: 2%
 
 #### Entry Conditions
@@ -41,16 +43,24 @@ The integration script handles:
 - Emergency stop mechanisms
 - Real-time balance monitoring
 
+## Files Structure
+```
+├── README.md
+├── triple_sma_strategy.pine    # TradingView Pine Script
+├── strategy.js                 # Capitalize.ai integration code
+└── LICENSE                     # MIT License file
+```
+
 ## Setup Instructions
 
 ### TradingView Setup
 1. Open TradingView Pine Script Editor
 2. Copy and paste the Pine Script code
 3. Configure initial parameters:
-   - Initial capital
-   - Maximum loss percentage
-   - Stop trading balance
-   - Risk per trade percentage
+   - Initial capital: $6,000
+   - Maximum loss percentage: 10%
+   - Stop trading balance: $5,400
+   - Risk per trade percentage: 2%
 4. Add strategy to chart and enable alerts
 
 ### Capitalize.ai Setup
@@ -60,7 +70,7 @@ The integration script handles:
    ```json
    {
      "initialCapital": 6000,
-     "stopTradingBalance": 4200,
+     "stopTradingBalance": 5400,
      "maxRiskPerTrade": 0.02
    }
    ```
@@ -111,6 +121,9 @@ For technical issues:
 - Test strategy in paper trading mode first
 
 ## Version History
+- v1.0.1: Updated maximum loss parameters
+  - Changed maximum loss from 30% to 10%
+  - Adjusted stop trading balance to $5,400
 - v1.0.0: Initial release
   - Triple SMA strategy implementation
   - Capital management integration
