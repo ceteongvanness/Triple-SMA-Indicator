@@ -5,7 +5,7 @@
 // Strategy Configuration
 const config = {
     initialCapital: 6000,
-    stopTradingBalance: 4200,  // Stop trading if balance falls below this
+    stopTradingBalance: 5400,  // Stop trading if balance falls below this
     maxRiskPerTrade: 0.02,     // 2% risk per trade
 };
 
