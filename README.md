@@ -1,81 +1,119 @@
-# Triple SMA Indicator for TradingView
-
-A custom TradingView indicator that displays three Simple Moving Averages (SMA) with different periods to help identify trends and potential support/resistance levels.
+# Triple SMA Trading Strategy with Capital Management
 
 ## Overview
-
-This indicator plots three SMAs on your chart:
-- Short-term SMA (20 periods) - Blue line
-- Medium-term SMA (50 periods) - Orange line
-- Long-term SMA (200 periods) - Red line
+This repository contains a complete trading strategy implementation using Triple Simple Moving Average (SMA) crossover with advanced capital management features. The strategy is implemented in Pine Script for TradingView and includes integration with Capitalize.ai for automated trading execution.
 
 ## Features
+- Triple SMA crossover strategy (20, 50, 200 periods)
+- Robust capital management system
+- Risk management per trade
+- Emergency stop-loss mechanisms
+- Real-time balance monitoring
+- Automated position sizing
+- Integration with Capitalize.ai for execution
 
-- Clean, easy-to-read visualization
-- Color-coded moving averages for quick trend identification
-- Customizable line widths and colors
-- Works on all timeframes
-- Compatible with all trading instruments (stocks, forex, crypto, etc.)
+## Components
 
-## Installation
+### 1. TradingView Strategy (Pine Script)
+The strategy uses three Simple Moving Averages:
+- 20-period SMA (short-term trend)
+- 50-period SMA (intermediate trend)
+- 200-period SMA (long-term trend)
 
-1. Open TradingView's Pine Editor
-2. Copy and paste the indicator code
-3. Click "Save" and give your indicator a name
-4. Click "Add to Chart"
+#### Risk Management Parameters
+- Initial Capital: $6,000
+- Maximum Loss: 30%
+- Stop Trading Balance: $4,200
+- Risk Per Trade: 2%
 
-## Pine Script Code
+#### Entry Conditions
+- Bullish Alignment: SMA20 > SMA50 > SMA200
+- Account balance must be above minimum threshold
+- No existing position
 
-```pinescript
-//@version=5
-indicator("Triple SMA", overlay=true)
+#### Exit Conditions
+- Bearish Alignment: SMA20 < SMA50 < SMA200
+- Emergency exit if balance falls below threshold
 
-// Calculate SMAs
-sma20 = ta.sma(close, 20)
-sma50 = ta.sma(close, 50)
-sma200 = ta.sma(close, 200)
+### 2. Capitalize.ai Integration
+The integration script handles:
+- Webhook signal processing
+- Position size calculation
+- Trade execution
+- Emergency stop mechanisms
+- Real-time balance monitoring
 
-// Plot SMAs with specified colors
-plot(sma20, color=color.new(#3177e0, 0), linewidth=2, title="SMA 20")  // Blue
-plot(sma50, color=color.new(#ff9800, 0), linewidth=2, title="SMA 50")  // Orange
-plot(sma200, color=color.new(#f44336, 0), linewidth=2, title="SMA 200")  // Red
-```
+## Setup Instructions
 
-## Usage
+### TradingView Setup
+1. Open TradingView Pine Script Editor
+2. Copy and paste the Pine Script code
+3. Configure initial parameters:
+   - Initial capital
+   - Maximum loss percentage
+   - Stop trading balance
+   - Risk per trade percentage
+4. Add strategy to chart and enable alerts
 
-The Triple SMA indicator can be used to:
-- Identify current market trend
-- Spot potential support and resistance levels
-- Find potential entry and exit points
-- Confirm trend changes
+### Capitalize.ai Setup
+1. Create a new strategy in Capitalize.ai
+2. Copy the integration code
+3. Configure webhook settings:
+   ```json
+   {
+     "initialCapital": 6000,
+     "stopTradingBalance": 4200,
+     "maxRiskPerTrade": 0.02
+   }
+   ```
+4. Set up alert routing from TradingView to Capitalize.ai
 
-### Common Signals
+## Alert Messages Format
+The strategy generates the following alert messages:
+- Buy Signal: `TRIPLE_SMA_BUY,balance=<current_balance>`
+- Sell Signal: `TRIPLE_SMA_SELL,balance=<current_balance>`
+- Emergency Exit: `EMERGENCY_EXIT,balance=<current_balance>`
 
-1. **Trend Direction**
-   - Price above all SMAs = Strong uptrend
-   - Price below all SMAs = Strong downtrend
-   - Price between SMAs = Consolidation or trend transition
+## Risk Warning
+Trading involves substantial risk of loss:
+- Always start with a small position size
+- Thoroughly backtest the strategy before live trading
+- Monitor the strategy performance regularly
+- Ensure your broker supports the required order types
+- Never risk more than you can afford to lose
 
-2. **Support/Resistance**
-   - SMAs often act as dynamic support/resistance levels
-   - 200 SMA is particularly important for long-term trend analysis
+## Maintenance
+- Regularly check and adjust risk parameters
+- Monitor strategy performance metrics
+- Update stop-loss levels based on market volatility
+- Verify webhook connectivity
+- Test emergency stop mechanisms periodically
 
-3. **Golden/Death Cross**
-   - Golden Cross: 50 SMA crosses above 200 SMA (bullish)
-   - Death Cross: 50 SMA crosses below 200 SMA (bearish)
+## Troubleshooting
+Common issues and solutions:
+1. Webhook Connection Issues
+   - Verify API keys
+   - Check network connectivity
+   - Confirm alert message format
 
-## Contributing
+2. Position Sizing Errors
+   - Verify account balance
+   - Check risk calculation parameters
+   - Ensure sufficient margin available
 
-Feel free to submit issues and enhancement requests!
+3. Emergency Stop Not Triggering
+   - Verify balance threshold settings
+   - Check alert routing
+   - Test emergency stop functionality
 
-## License
+## Support
+For technical issues:
+- Review TradingView Pine Script documentation
+- Check Capitalize.ai API documentation
+- Test strategy in paper trading mode first
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Author
-
-ET CHEAH
-
-## Disclaimer
-
-This indicator is for informational purposes only. It should not be considered financial advice. Always do your own research and consider your risk tolerance before trading.
+## Version History
+- v1.0.0: Initial release
+  - Triple SMA strategy implementation
+  - Capital management integration
+  - Capitalize.ai webhook setup
