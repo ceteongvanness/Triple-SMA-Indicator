@@ -1,0 +1,67 @@
+// =============================================
+// TradingView Pine Script Implementation
+// =============================================
+
+//@version=5
+strategy("Triple SMA with Capital Management", 
+    overlay=true, 
+    initial_capital=6000, 
+    default_qty_type=strategy.percent_of_equity, 
+    default_qty_value=100)
+
+// Risk Management Parameters
+maxLossPercent = input.float(30, "Maximum Total Loss %", minval=1, maxval=100)
+stopTradingBalance = input.float(4200, "Stop Trading Below Balance", minval=1000, maxval=6000)
+riskPerTrade = input.float(2, "Risk Per Trade %", minval=0.1, maxval=10)
+
+// SMA Calculations
+sma20 = ta.sma(close, 20)
+sma50 = ta.sma(close, 50)
+sma200 = ta.sma(close, 200)
+
+// Plotting SMAs on Chart
+plot(sma20, color=color.new(#3177e0, 0), linewidth=2, title="SMA 20")
+plot(sma50, color=color.new(#ff9800, 0), linewidth=2, title="SMA 50")
+plot(sma200, color=color.new(#f44336, 0), linewidth=2, title="SMA 200")
+
+// Trading Conditions
+bullishAlignment = sma20 > sma50 and sma50 > sma200
+bearishAlignment = sma20 < sma50 and sma50 < sma200
+
+// Capital Management
+currentBalance = strategy.equity
+isBalanceOK = currentBalance >= stopTradingBalance
+maxRiskAmount = (currentBalance * riskPerTrade) / 100
+
+// Position Size Calculation
+riskPerShare = close * (riskPerTrade/100)
+positionSize = math.floor(maxRiskAmount / riskPerShare)
+
+// Entry Logic with Capital Management
+if (bullishAlignment and isBalanceOK and strategy.position_size == 0)
+    strategy.entry("Long", strategy.long, qty=positionSize, 
+        alert_message="TRIPLE_SMA_BUY,balance=" + str.tostring(currentBalance))
+
+// Exit Conditions
+if (strategy.position_size > 0)
+    // Regular exit on bearish alignment
+    if (bearishAlignment)
+        strategy.close("Long", comment="Signal Exit", 
+            alert_message="TRIPLE_SMA_SELL,balance=" + str.tostring(currentBalance))
+    
+    // Emergency exit on low balance
+    if (currentBalance <= stopTradingBalance)
+        strategy.close_all(comment="Emergency Stop - Low Balance", 
+            alert_message="EMERGENCY_EXIT,balance=" + str.tostring(currentBalance))
+
+// Display Balance and Status Label
+var label balanceLabel = na
+label.delete(balanceLabel[1])
+balanceLabel := label.new(
+    bar_index, high, 
+    text=str.format("Balance: ${0}\nStatus: {1}", 
+        str.tostring(currentBalance, "#.##"), 
+        isBalanceOK ? "Trading Enabled" : "Trading Stopped"),
+    style=label.style_label_lower_right,
+    color=isBalanceOK ? color.green : color.red
+)
