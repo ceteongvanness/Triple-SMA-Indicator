@@ -73,32 +73,44 @@ To overcome these challenges, we'll use:
 class IBapi(EWrapper, EClient):
     def __init__(self):
         EClient.__init__(self, self)
-        self.data = []
-        self.positions = {}
+        self.data = []  # Initialize variable to store candle data
+        self.positions = {}  # Dictionary to store current positions
         self.data_received = False
         
     def historicalData(self, reqId, bar):
+        # Called when historical data is received
         self.data.append([bar.date, bar.open, bar.high, bar.low, bar.close, bar.volume])
         
     def historicalDataEnd(self, reqId, start, end):
+        # Called when all historical data has been received
         print(f"Historical data received from {start} to {end}")
         self.data_received = True
         
     def position(self, account, contract, position, avgCost):
+        # Called when position information is received
         super().position(account, contract, position, avgCost)
         key = contract.symbol
         self.positions[key] = position
+        print(f"Current position for {key}: {position} shares at avg cost of {avgCost}")
         
     def nextValidId(self, orderId):
+        # Called when connection is established and next valid order ID is received
         super().nextValidId(orderId)
         self.nextOrderId = orderId
         print(f"Connected to TWS. Next valid order ID: {orderId}")
         
     def error(self, reqId, errorCode, errorString):
+        # Called when an error occurs
         print(f"Error {errorCode}: {errorString}")
+        
+    def orderStatus(self, orderId, status, filled, remaining, avgFillPrice, 
+                   permId, parentId, lastFillPrice, clientId, whyHeld, mktCapPrice):
+        # Called when order status changes
+        print(f"Order {orderId} status: {status}, filled: {filled}, remaining: {remaining}, price: {avgFillPrice}")
 
-# Function to create a contract
+
 def create_contract(symbol, secType='STK', exchange='SMART', currency='USD'):
+    """Create a contract object for a specific security"""
     contract = Contract()
     contract.symbol = symbol
     contract.secType = secType
@@ -106,38 +118,65 @@ def create_contract(symbol, secType='STK', exchange='SMART', currency='USD'):
     contract.currency = currency
     return contract
 
-# Function to create an order
+
 def create_order(action, quantity, order_type='MKT'):
+    """Create an order object"""
     order = Order()
     order.action = action
     order.totalQuantity = quantity
     order.orderType = order_type
     return order
 
-# Function to calculate SMA and generate signals
-def calculate_sma_strategy(data, short_period=20, long_period=50):
+
+def calculate_triple_sma(data, sma20_period=20, sma50_period=50, sma200_period=200):
+    """
+    Calculate Triple SMA and generate signals based on the strategy
+    """
+    # Convert data to DataFrame
     df = pd.DataFrame(data, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
     
+    # Convert date strings to datetime objects if needed
     if isinstance(df['date'].iloc[0], str):
         df['date'] = pd.to_datetime(df['date'], format='%Y%m%d %H:%M:%S')
     
-    df['short_sma'] = df['close'].rolling(window=short_period).mean()
-    df['long_sma'] = df['close'].rolling(window=long_period).mean()
+    # Calculate SMAs
+    df['sma20'] = df['close'].rolling(window=sma20_period).mean()
+    df['sma50'] = df['close'].rolling(window=sma50_period).mean()
+    df['sma200'] = df['close'].rolling(window=sma200_period).mean()
     
+    # Generate signals based on SMA relationships
+    # Buy when price > SMA20 > SMA50 > SMA200 (strong uptrend)
+    # Sell when price < SMA20 < SMA50 < SMA200 (strong downtrend)
     df['signal'] = 0
-    df['signal'][short_period:] = np.where(
-        df['short_sma'][short_period:] > df['long_sma'][short_period:], 1, 0)
     
+    # We need at least 200 periods of data to calculate all SMAs
+    for i in range(sma200_period, len(df)):
+        # Strong uptrend condition
+        if (df['close'].iloc[i] > df['sma20'].iloc[i] > 
+            df['sma50'].iloc[i] > df['sma200'].iloc[i]):
+            df['signal'].iloc[i] = 1
+        # Strong downtrend condition
+        elif (df['close'].iloc[i] < df['sma20'].iloc[i] < 
+              df['sma50'].iloc[i] < df['sma200'].iloc[i]):
+            df['signal'].iloc[i] = -1
+    
+    # Calculate position changes (1 for buy, -1 for sell, 0 for hold)
     df['position'] = df['signal'].diff()
     
     return df
 
-# Function to visualize the strategy
-def visualize_strategy(df, symbol, short_period, long_period):
-    plt.figure(figsize=(12, 6))
-    plt.plot(df['date'], df['close'], label='Close Price')
-    plt.plot(df['date'], df['short_sma'], label=f'Short SMA ({short_period})')
-    plt.plot(df['date'], df['long_sma'], label=f'Long SMA ({long_period})')
+
+def visualize_triple_sma_strategy(df, symbol):
+    """
+    Visualize the Triple SMA strategy results
+    """
+    plt.figure(figsize=(14, 7))
+    
+    # Plot price and SMAs
+    plt.plot(df['date'], df['close'], label='Close Price', alpha=0.7)
+    plt.plot(df['date'], df['sma20'], label='SMA 20', color='#3177e0', linewidth=2)
+    plt.plot(df['date'], df['sma50'], label='SMA 50', color='#ff9800', linewidth=2)
+    plt.plot(df['date'], df['sma200'], label='SMA 200', color='#f44336', linewidth=2)
     
     # Plot buy/sell signals
     buy_signals = df[df['position'] > 0]['date']
@@ -149,18 +188,20 @@ def visualize_strategy(df, symbol, short_period, long_period):
     plt.scatter(buy_signals, buy_prices, marker='^', color='green', s=100, label='Buy Signal')
     plt.scatter(sell_signals, sell_prices, marker='v', color='red', s=100, label='Sell Signal')
     
-    plt.title(f'SMA Crossover Strategy for {symbol}')
+    plt.title(f'Triple SMA Strategy for {symbol}')
     plt.xlabel('Date')
     plt.ylabel('Price')
     plt.legend()
     plt.grid(True)
+    
     plt.show()
 
-# Function to test the strategy
-def test_strategy(host, port, symbol='AAPL', short_period=20, long_period=50):
+
+def test_triple_sma_strategy(host, port, symbol='AAPL'):
+    """Test the Triple SMA strategy for a specific symbol"""
     # Connect to TWS via ngrok
     app = IBapi()
-    app.connect(host, port, 0)
+    app.connect(host, port, 0)  # Connect via ngrok
     
     # Start the socket in a separate thread
     api_thread = threading.Thread(target=app.run, daemon=True)
@@ -171,31 +212,31 @@ def test_strategy(host, port, symbol='AAPL', short_period=20, long_period=50):
     
     if not app.isConnected():
         print("Failed to connect to TWS. Please check your ngrok tunnel and TWS settings.")
-        return None, None
+        return None
     
     # Create contract for the symbol
     contract = create_contract(symbol)
     
     # Request historical data
-    app.data = []
+    app.data = []  # Reset data
     app.data_received = False
     
-    # Request 1 year of daily data
+    # Request 2 years of daily data to have enough for SMA 200
     app.reqHistoricalData(
         reqId=1,
         contract=contract,
-        endDateTime='',
-        durationStr='1 Y',
-        barSizeSetting='1 day',
-        whatToShow='MIDPOINT',
-        useRTH=1,
-        formatDate=1,
-        keepUpToDate=False,
-        chartOptions=[]
+        endDateTime='',  # Empty string means "now"
+        durationStr='2 Y',  # Duration of data (2 years)
+        barSizeSetting='1 day',  # Bar size (1 day)
+        whatToShow='MIDPOINT',  # Type of data
+        useRTH=1,  # Regular Trading Hours only
+        formatDate=1,  # Date format (1 = yyyyMMdd HH:mm:ss)
+        keepUpToDate=False,  # Don't keep updating
+        chartOptions=[]  # No chart options
     )
     
     # Wait for data to be received
-    timeout = 10
+    timeout = 15  # seconds
     start_time = time.time()
     while not app.data_received and time.time() - start_time < timeout:
         time.sleep(0.5)
@@ -207,22 +248,51 @@ def test_strategy(host, port, symbol='AAPL', short_period=20, long_period=50):
     if len(app.data) > 0:
         print(f"Received {len(app.data)} bars of historical data for {symbol}")
         
-        # Calculate SMA and generate signals
-        df = calculate_sma_strategy(app.data, short_period, long_period)
+        # Calculate Triple SMA and generate signals
+        df = calculate_triple_sma(app.data)
         
         # Visualize the strategy
-        visualize_strategy(df, symbol, short_period, long_period)
+        visualize_triple_sma_strategy(df, symbol)
         
-        return df, app
+        # Calculate performance metrics
+        if len(df[df['position'] != 0]) > 0:
+            # Count buy and sell signals
+            buy_signals = len(df[df['position'] > 0])
+            sell_signals = len(df[df['position'] < 0])
+            
+            print(f"\nStrategy Performance Summary for {symbol}:")
+            print(f"Total Buy Signals: {buy_signals}")
+            print(f"Total Sell Signals: {sell_signals}")
+            
+            # Current signal
+            current_signal = df['signal'].iloc[-1]
+            if current_signal == 1:
+                print(f"Current Signal: BUY/HOLD (Strong Uptrend)")
+            elif current_signal == -1:
+                print(f"Current Signal: SELL/SHORT (Strong Downtrend)")
+            else:
+                print(f"Current Signal: NEUTRAL (No Clear Trend)")
+            
+            # Current SMA values
+            print(f"\nCurrent SMA Values:")
+            print(f"SMA 20: {df['sma20'].iloc[-1]:.2f}")
+            print(f"SMA 50: {df['sma50'].iloc[-1]:.2f}")
+            print(f"SMA 200: {df['sma200'].iloc[-1]:.2f}")
+            print(f"Current Price: {df['close'].iloc[-1]:.2f}")
+        else:
+            print("No trading signals generated for the given data.")
+        
+        return df
     else:
         print(f"No data received for {symbol}")
-        return None, None
+        return None
 
-# Function to execute a trade
+
 def execute_trade(host, port, symbol, action, quantity):
+    """Execute a trade for a specific symbol"""
     # Connect to TWS via ngrok
     app = IBapi()
-    app.connect(host, port, 0)
+    app.connect(host, port, 0)  # Connect via ngrok
     
     # Start the socket in a separate thread
     api_thread = threading.Thread(target=app.run, daemon=True)
@@ -257,34 +327,53 @@ def execute_trade(host, port, symbol, action, quantity):
 ### Part 4: Running the Strategy in Colab
 
 ```python
-# Enter your ngrok forwarding address
-ngrok_host = "0.tcp.ngrok.io"  # Replace with your ngrok host
-ngrok_port = 12345  # Replace with your ngrok port
+ngrok_host = input("Enter your ngrok host (e.g., 0.tcp.ngrok.io): ")
+ngrok_port = int(input("Enter your ngrok port: "))
 
-# Test the strategy
-symbol = "AAPL"
-short_period = 20
-long_period = 50
+print("\n=== Triple SMA Trading Strategy ===")
+print("This notebook implements a trading strategy based on 20, 50, and 200-day Simple Moving Averages.")
+print("Options:")
+print("1. Test the strategy (backtest and visualize)")
+print("2. Execute a trade based on current signal")
 
-print(f"Testing SMA strategy for {symbol} with short period={short_period}, long period={long_period}")
-print("Connecting to TWS via ngrok tunnel...")
+choice = input("Enter your choice (1-2): ")
 
-df, app = test_strategy(ngrok_host, ngrok_port, symbol, short_period, long_period)
-
-# If you want to execute a trade based on the latest signal
-if df is not None and len(df) > long_period:
-    latest_position_change = df['position'].iloc[-1]
+if choice == "1":
+    # Test the strategy
+    symbol = input("Enter symbol to test (default: AAPL): ") or "AAPL"
+    print(f"\nTesting Triple SMA strategy for {symbol}...")
+    df = test_triple_sma_strategy(ngrok_host, ngrok_port, symbol)
     
-    if latest_position_change > 0:
-        print(f"Latest signal: BUY {symbol}")
-        # Uncomment to execute trade
-        # execute_trade(ngrok_host, ngrok_port, symbol, "BUY", 100)
-    elif latest_position_change < 0:
-        print(f"Latest signal: SELL {symbol}")
-        # Uncomment to execute trade
-        # execute_trade(ngrok_host, ngrok_port, symbol, "SELL", 100)
+    if df is not None and len(df) > 0:
+        # Display the latest signal
+        latest_signal = df['signal'].iloc[-1]
+        if latest_signal == 1:
+            print(f"\nLatest Signal: BUY/HOLD {symbol} (Strong Uptrend)")
+        elif latest_signal == -1:
+            print(f"\nLatest Signal: SELL/SHORT {symbol} (Strong Downtrend)")
+        else:
+            print(f"\nLatest Signal: NEUTRAL for {symbol} (No Clear Trend)")
+    
+elif choice == "2":
+    # Execute a trade
+    symbol = input("Enter symbol to trade (default: AAPL): ") or "AAPL"
+    action = input("Enter action (BUY or SELL): ").upper()
+    quantity = int(input("Enter quantity: "))
+    
+    if action in ["BUY", "SELL"]:
+        print(f"\nExecuting {action} order for {quantity} shares of {symbol}...")
+        success = execute_trade(ngrok_host, ngrok_port, symbol, action, quantity)
+        if success:
+            print(f"Order for {symbol} successfully submitted.")
+        else:
+            print(f"Failed to submit order for {symbol}.")
     else:
-        print(f"No trading signal for {symbol}")
+        print("Invalid action. Must be BUY or SELL.")
+        
+else:
+    print("Invalid choice.")
+
+print("\nStrategy execution completed.")
 ```
 
 ## Important Considerations for Colab
