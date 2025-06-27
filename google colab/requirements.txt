@@ -8,6 +8,9 @@ matplotlib>=3.4.0
 ibapi>=9.81.1
 ib_insync>=0.9.86
 
+# Performance analytics
+quantstats>=0.0.59
+
 # Optional backup data source
 yfinance>=0.1.87
 
@@ -21,11 +24,4 @@ eventkit>=1.0.0
 # - logging (built-in)
 # - time (built-in)
 # - sys (built-in)
-
-
-3346
-3323
-3227(Device Builder)
-3186 -need help
-3044 - diff
-Full TAF
+# - functools (built-in)
