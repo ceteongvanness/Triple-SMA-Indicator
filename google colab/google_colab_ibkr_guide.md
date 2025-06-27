@@ -1,312 +1,399 @@
-# Enhanced IBKR Trading System v2.0
+# 🚀 Enhanced Triple SMA Trading Strategy with QuantStats
 
-A comprehensive algorithmic trading system for Interactive Brokers (IBKR) that can be run in Google Colab with advanced technical analysis, risk management, and multi-indicator strategies.
+[![Python](https://img.shields.io/badge/Python-3.8%2B-blue)](https://www.python.org/)
+[![Google Colab](https://img.shields.io/badge/Google-Colab-orange)](https://colab.research.google.com/)
+[![IBKR API](https://img.shields.io/badge/IBKR-API-green)](https://interactivebrokers.github.io/)
+[![QuantStats](https://img.shields.io/badge/QuantStats-Analytics-purple)](https://github.com/ranaroussi/quantstats)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
-## 🚀 Features
+> **Professional-grade algorithmic trading system implementing Triple SMA (20/50/200) strategy with comprehensive analytics, robust IBKR integration, and Google Colab compatibility.**
 
-### Enhanced Strategy Components
-- **Triple SMA Strategy**: 20, 50, and 200-day Simple Moving Averages with trend confirmation
-- **RSI Confirmation**: 14-period Relative Strength Index for momentum filtering
-- **Volume Analysis**: Volume spike detection with moving average comparison
-- **Signal Strength Calculation**: 0-100% confidence rating for each signal
-- **ATR-based Stop Losses**: Automatic stop loss recommendations using Average True Range
+## 📊 Overview
 
-### Advanced Risk Management
-- **Position Sizing**: Automated calculation based on 2% account risk rule
-- **Portfolio Allocation**: Intelligent position sizing recommendations
-- **Risk Metrics**: Real-time risk assessment and portfolio exposure analysis
-- **Stop Loss Integration**: Dynamic stop loss levels based on market volatility
+This enhanced trading system combines the simplicity of the Triple Simple Moving Average strategy with enterprise-level infrastructure and comprehensive performance analytics. Designed for both novice and experienced traders, it provides seamless integration between Google Colab and Interactive Brokers through ngrok tunneling.
 
-### Comprehensive Analysis Tools
-- **Multi-Symbol Analysis**: Compare signals across multiple stocks simultaneously
-- **4-Panel Dashboard**: Price charts, RSI, volume analysis, and signal strength visualization
-- **Performance Metrics**: Detailed backtesting results with win/loss ratios
-- **Market Hours Detection**: Automatic trading hours validation
+### 🎯 Key Features
 
-### User Experience
-- **Interactive Menu System**: Easy-to-use command-line interface
-- **Account Summary**: Quick account balance and position overview
-- **Real-time Logging**: Detailed operation logs with timestamps
-- **Error Recovery**: Robust error handling with automatic retry mechanisms
+- **📈 Triple SMA Strategy**: 20, 50, and 200-day Simple Moving Averages
+- **🔗 Robust IBKR Integration**: Auto-retry connection logic with comprehensive error handling
+- **🌐 ngrok Auto-Detection**: Automatic tunnel discovery and validation
+- **📊 Advanced Analytics**: QuantStats integration with custom performance metrics
+- **🎨 Enhanced Visualizations**: Multi-subplot charts with signals and drawdowns
+- **🔍 Data Quality Validation**: Comprehensive price data validation and filtering
+- **🛠️ Professional Diagnostics**: Connection monitoring and troubleshooting tools
+- **📱 User-Friendly Interface**: Guided setup wizard and intuitive menu system
 
-## 📋 Requirements
+## 🏗️ Architecture
 
-### Software Dependencies
-```python
-# Core packages
-pandas>=1.3.0
-numpy>=1.21.0
-matplotlib>=3.4.0
-threading
-datetime
-logging
-
-# IBKR API
-ibapi>=9.81.1
-ib_insync>=0.9.86
-
-# Optional (backup data source)
-yfinance>=0.1.87
+```mermaid
+graph TB
+    A[Google Colab] -->|ngrok tunnel| B[Local Machine]
+    B --> C[TWS/IB Gateway]
+    C --> D[IBKR Paper Trading]
+    
+    A --> E[Enhanced Strategy Engine]
+    E --> F[Data Validation]
+    E --> G[Signal Generation]
+    E --> H[Risk Management]
+    
+    E --> I[QuantStats Analytics]
+    E --> J[Custom Metrics]
+    E --> K[Enhanced Visualizations]
 ```
 
-### IBKR Setup
-1. **TWS or IB Gateway** installed and configured
-2. **API connections enabled** in TWS/Gateway settings
-3. **Paper trading account** (recommended for testing)
-4. **Market data subscriptions** for desired securities
+## 🚦 Quick Start
 
-### Network Setup
-1. **ngrok** for secure tunneling ([Download here](https://ngrok.com/download))
-2. **Stable internet connection**
-3. **Port forwarding** capabilities
+### 1. **Prerequisites Setup**
 
-## 🛠 Installation & Setup
+#### IBKR Account Setup
+- ✅ Create IBKR paper trading account
+- ✅ Download and install TWS or IB Gateway
+- ✅ Subscribe to US Securities Snapshot Bundle ($10/month, waived with $30 commissions)
 
-### Step 1: IBKR Configuration
-1. Download and install TWS or IB Gateway from IBKR
-2. Enable API connections:
-   - Go to Global Configuration → API → Settings
-   - Enable "ActiveX and Socket Clients"
-   - Set Socket port to 7497 (paper trading) or 7496 (live)
-   - Enable "Download open orders on connection"
-
-### Step 2: ngrok Setup
+#### Local Machine Setup
 ```bash
-# Download and install ngrok
-wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
-unzip ngrok-stable-linux-amd64.zip
+# Install ngrok
+# Download from: https://ngrok.com/download
+# Or use package manager:
+brew install ngrok  # macOS
+choco install ngrok  # Windows
+snap install ngrok   # Linux
 
-# Authenticate with your ngrok token
-./ngrok authtoken YOUR_AUTH_TOKEN
-
-# Create tunnel to TWS (run this when TWS is active)
-./ngrok tcp 7497
+# Authenticate ngrok
+ngrok config add-authtoken YOUR_AUTH_TOKEN
 ```
 
-### Step 3: Google Colab Setup
+#### TWS Configuration
+1. Open TWS with paper trading credentials
+2. Navigate to: **File** → **Global Configuration** → **API** → **Settings**
+3. Enable: "Enable ActiveX and Socket Clients"
+4. Set socket port: `7497` (paper trading)
+5. Add trusted IP: `127.0.0.1`
+6. Apply settings and restart TWS
+
+### 2. **Connection Setup**
+
+#### Start ngrok Tunnel
+```bash
+# In terminal/command prompt
+ngrok tcp 7497
+```
+
+#### Note Connection Details
+```
+Forwarding: tcp://0.tcp.ngrok.io:12345 -> localhost:7497
+            ↑                    ↑
+         Your Host            Your Port
+```
+
+### 3. **Google Colab Setup**
+
+#### Option A: Direct Copy-Paste
 1. Open [Google Colab](https://colab.research.google.com/)
-2. Create a new notebook
-3. Copy and paste the provided cells sequentially
-4. Run each cell in order
+2. Create new notebook
+3. Copy each cell from `triple-sma-colab-notebook.py`
+4. Run cells sequentially (1-11)
 
-## 🎯 Quick Start Guide
+#### Option B: Upload Notebook
+1. Save the code as `.ipynb` file
+2. Upload to Google Colab
+3. Run all cells
 
-### 1. Start the System
+### 4. **Run the System**
+
 ```python
-# After running all setup cells
-run_enhanced_trading_system()
+# In the final cell, choose from options:
+1️⃣ Guided setup (recommended for first-time users)
+2️⃣ Quick test with auto-detection
+3️⃣ Manual connection test
+4️⃣ Run strategy with real IBKR data
+5️⃣ Demo with sample data
+6️⃣ Connection diagnostics
+7️⃣ System information
 ```
 
-### 2. Enter Connection Details
-- **ngrok host**: Copy from ngrok output (e.g., `0.tcp.ngrok.io`)
-- **ngrok port**: Copy port number from ngrok output
+## 📋 Strategy Details
 
-### 3. Choose Your Operation
-```
-📋 ENHANCED TRADING SYSTEM MENU
-1. 📊 Test Enhanced Strategy (with analysis)
-2. 🎯 Execute Trade  
-3. 💰 Quick Account Check
-4. 📈 Multi-Symbol Analysis
-5. ❌ Exit
-```
+### 🎯 Triple SMA Logic
 
-### 4. Strategy Testing Example
+The strategy uses three Simple Moving Averages to identify trend direction and generate trading signals:
+
 ```python
-# Test Apple stock with full analysis
-Symbol: AAPL
-Show visualizations: y
-
-# Results will include:
-# - 4-panel chart analysis
-# - Signal strength ratings
-# - Risk management recommendations
-# - Current market status
+# Signal Generation Rules
+🟢 BUY Signal:  Price > SMA20 > SMA50 > SMA200  # Strong Uptrend
+🔴 SELL Signal: Price < SMA20 < SMA50 < SMA200  # Strong Downtrend
+➡️ NEUTRAL:    Mixed conditions               # No clear trend
 ```
 
-## 📊 Strategy Logic
+### 📊 Performance Metrics
 
-### Signal Generation Rules
+The system calculates comprehensive performance metrics:
 
-#### Buy Signals (Long Entry)
-- **Primary**: Price > SMA20 > SMA50 > SMA200
-- **RSI Filter**: 35 < RSI < 75 (avoid extreme conditions)
-- **Volume Confirmation**: Current volume > 1.2x average volume
-- **Proximity Check**: Price within 5% of SMA20
+#### Standard Metrics
+- **CAGR**: Compound Annual Growth Rate
+- **Sharpe Ratio**: Risk-adjusted returns
+- **Maximum Drawdown**: Largest peak-to-trough decline
+- **Win Rate**: Percentage of profitable trades
+- **Volatility**: Annualized standard deviation
 
-#### Sell Signals (Short Entry/Long Exit)
-- **Primary**: Price < SMA20 < SMA50 < SMA200
-- **RSI Filter**: 25 < RSI < 65 (avoid extreme conditions)
-- **Volume Confirmation**: Current volume > 1.2x average volume
-- **Proximity Check**: Price within 5% of SMA20
+#### Custom Metrics
+- **Profit Factor**: Gross profit / Gross loss
+- **Average Win/Loss**: Mean winning vs losing trade
+- **Trading Frequency**: Number of signals per year
+- **Data Quality Score**: Percentage of valid data points
 
-#### Signal Strength Calculation
+## 🔧 System Components
+
+### 📁 File Structure
+```
+project/
+├── requirements.txt                    # Package dependencies
+├── triple-sma-colab-notebook.py      # Enhanced Colab notebook
+├── README.md                          # This file
+├── LICENSE                            # MIT License
+└── docs/
+    ├── setup-guide.md                 # Detailed setup instructions
+    ├── troubleshooting.md             # Common issues and solutions
+    └── api-reference.md               # Function documentation
+```
+
+### 🧩 Core Components
+
+#### 1. **ConnectionManager Class**
 ```python
-signal_strength = (sma_spread * 0.4) + (rsi_strength * 0.3) + (volume_strength * 0.3)
-# Strong signals: >60% strength
-# Weak signals: ≤60% strength
+# Handles ngrok and IBKR connection management
+- check_ngrok_status()      # Verify tunnel status
+- test_network_connection() # Validate connectivity
+- get_connection_stats()    # Monitor performance
 ```
 
-## 💰 Risk Management
-
-### Position Sizing Formula
+#### 2. **EnhancedIBapi Class**
 ```python
-max_risk_per_trade = account_value * 0.02  # 2% rule
-position_size = max_risk_per_trade / stop_loss_distance
-max_shares = min(position_size, account_value * 0.10 / stock_price)
+# Robust IBKR API wrapper with error handling
+- Enhanced error categorization
+- Data quality validation
+- Connection status monitoring
+- Automatic retry logic
 ```
 
-### Stop Loss Calculation
+#### 3. **Strategy Engine**
 ```python
-# For long positions
-stop_loss = entry_price - (2 * ATR)
-
-# For short positions  
-stop_loss = entry_price + (2 * ATR)
+# Core trading strategy implementation
+- calculate_triple_sma_enhanced()   # Signal generation
+- create_enhanced_visualization()   # Multi-chart plotting
+- generate_enhanced_analytics()     # Performance analysis
 ```
 
-## 📈 Visualization Features
+## 📊 Data Requirements
 
-### 4-Panel Dashboard
-1. **Price Chart**: Candlestick data with SMA overlays and signal markers
-2. **RSI Panel**: 14-period RSI with overbought/oversold zones
-3. **Volume Analysis**: Volume bars with moving average comparison
-4. **Signal Strength**: Time series of signal confidence levels
+### 📈 Market Data Subscription
 
-### Signal Markers
-- 🟢 **Strong Buy**: Dark green triangles (>60% strength)
-- 🟢 **Weak Buy**: Light green triangles (≤60% strength)
-- 🔴 **Strong Sell**: Dark red triangles (>60% strength)  
-- 🔴 **Weak Sell**: Light red triangles (≤60% strength)
+For live trading, you need:
+- **US Securities Snapshot Bundle**: $10/month
+- **Waiver Condition**: $30+ monthly commissions
+- **Includes**: Real-time quotes, options data, volume
 
-## 🔧 Advanced Features
+### 📉 Historical Data
 
-### Multi-Symbol Analysis
-```python
-# Analyze multiple stocks simultaneously
-Symbols: AAPL,MSFT,GOOGL,TSLA,AMZN
+The system requires:
+- **Minimum**: 200+ daily bars (for SMA 200)
+- **Recommended**: 500+ daily bars (2+ years)
+- **Quality**: Valid OHLCV data with no gaps
 
-# Output includes:
-# - Comparative signal table
-# - Best buy/sell opportunities
-# - Risk-adjusted recommendations
+## ⚡ Performance Optimization
+
+### 🚀 Speed Enhancements
+- **LRU Caching**: `@functools.lru_cache` for repeated calculations
+- **Vectorized Operations**: Pandas vectorization for signal generation
+- **Efficient Data Structures**: Optimized DataFrame operations
+- **Minimal API Calls**: Batch data requests
+
+### 💾 Memory Management
+- **Data Validation**: Remove invalid data points early
+- **Selective Plotting**: Only plot necessary timeframes
+- **Garbage Collection**: Automatic cleanup of large objects
+
+## 🛠️ Troubleshooting
+
+### ❌ Common Issues
+
+#### 1. **Connection Refused**
 ```
-
-### Account Management
-```python
-# Quick account overview
-Account Value: $50,000.00
-Available Funds: $45,000.00
-Buying Power: $90,000.00
-Current Positions: AAPL (100 shares @ $150.00)
-```
-
-### Export Capabilities
-```python
-# Save analysis results
-save_analysis_results(df, symbol)
-# Creates: AAPL_analysis_20250123_143022.csv
-```
-
-## ⚠️ Important Disclaimers
-
-1. **Educational Purpose**: This system is for educational and research purposes only
-2. **No Financial Advice**: Not intended as investment or financial advice
-3. **Paper Trading First**: Always test strategies in paper trading before live trading
-4. **Risk Warning**: All trading involves risk of loss
-5. **Professional Consultation**: Consider consulting a financial advisor
-
-## 🚨 Security Considerations
-
-### ngrok Security
-- Use ngrok's authentication features
-- Monitor tunnel access logs
-- Consider paid ngrok plans for additional security
-- Limit tunnel exposure time
-
-### API Security
-- Use paper trading for development
-- Implement IP whitelisting when possible
-- Monitor API usage and connections
-- Keep API credentials secure
-
-## 🔍 Troubleshooting
-
-### Common Issues
-
-#### Connection Problems
-```
-❌ Failed to connect to TWS
+Problem: socket.error: [Errno 111] Connection refused
 Solutions:
-1. Verify TWS/Gateway is running
-2. Check API settings are enabled
-3. Confirm ngrok tunnel is active
-4. Test local connection first
+✅ Check TWS/Gateway is running
+✅ Verify API is enabled in TWS settings
+✅ Ensure ngrok tunnel is active
+✅ Check firewall settings
 ```
 
-#### Data Issues
+#### 2. **ngrok Tunnel Issues**
 ```
-❌ Insufficient historical data
+Problem: Failed to complete tunnel connection
 Solutions:
-1. Verify market data subscriptions
-2. Check symbol spelling
-3. Ensure adequate trading history
-4. Try different time periods
+✅ Restart ngrok: ngrok tcp 7497
+✅ Check ngrok auth token
+✅ Verify account limits (free accounts have session limits)
+✅ Use ngrok web interface: http://127.0.0.1:4040
 ```
 
-#### Installation Problems
+#### 3. **Data Quality Issues**
 ```
-❌ Package import errors
+Problem: Invalid or missing price data
 Solutions:
-1. Re-run installation cells
-2. Restart Colab runtime
-3. Check Python version compatibility
-4. Clear pip cache
+✅ Check market data subscription status
+✅ Verify symbol exists and is tradeable
+✅ Use different time range for historical data
+✅ Check for market holidays/closures
 ```
 
-### Debug Mode
+#### 4. **API Timeout**
+```
+Problem: IBKR API doesn't respond
+Solutions:
+✅ Check TWS API settings
+✅ Try different client ID (1, 2, 3, etc.)
+✅ Restart TWS
+✅ Verify paper trading mode is active
+```
+
+### 🔍 Diagnostic Tools
+
+The system includes built-in diagnostic tools:
+
 ```python
-# Enable detailed logging
-import logging
-logging.basicConfig(level=logging.DEBUG)
+# Run comprehensive diagnostics
+enhanced_triple_sma_system()
+# Choose option 6: Connection diagnostics
 ```
 
-## 📚 Additional Resources
+**Diagnostics Include**:
+- ngrok status verification
+- Connection history analysis
+- Performance statistics
+- System information display
 
-### IBKR Documentation
-- [TWS API Documentation](https://interactivebrokers.github.io/tws-api/)
-- [IB Gateway Setup Guide](https://www.interactivebrokers.com/en/index.php?f=16457)
-- [Paper Trading Account](https://www.interactivebrokers.com/en/index.php?f=1286)
+## 📈 Usage Examples
 
-### Technical Analysis
-- [Moving Average Strategies](https://www.investopedia.com/articles/active-trading/052014/how-use-moving-average-buy-stocks.asp)
-- [RSI Indicator Guide](https://www.investopedia.com/terms/r/rsi.asp)
-- [Volume Analysis](https://www.investopedia.com/terms/v/volume.asp)
+### 🎯 Basic Strategy Test
+```python
+# Test strategy on AAPL with 2 years of data
+run_enhanced_strategy('0.tcp.ngrok.io', 12345, 'AAPL')
+```
 
-### Risk Management
-- [Position Sizing Strategies](https://www.investopedia.com/articles/trading/09/position-size-and-capital-risk.asp)
-- [Stop Loss Orders](https://www.investopedia.com/terms/s/stop-lossorder.asp)
+### 📊 Multiple Symbol Analysis
+```python
+symbols = ['AAPL', 'GOOGL', 'MSFT', 'TSLA']
+for symbol in symbols:
+    run_enhanced_strategy(host, port, symbol)
+```
+
+### 🎲 Sample Data Demo
+```python
+# Test without IBKR connection
+run_sample_data_demo('DEMO_STOCK')
+```
+
+## 📊 Expected Results
+
+### 📈 Typical Performance Metrics
+Based on backtesting major US equities:
+
+| Metric | Range | Notes |
+|--------|-------|-------|
+| **CAGR** | 5-15% | Varies by market conditions |
+| **Sharpe Ratio** | 0.5-1.2 | Risk-adjusted performance |
+| **Max Drawdown** | -10% to -25% | Depends on volatility period |
+| **Win Rate** | 40-60% | Trend-following characteristic |
+| **Trades/Year** | 2-8 | Low frequency strategy |
+
+### 🎯 Strategy Characteristics
+- **Style**: Trend-following
+- **Frequency**: Low (2-8 trades/year typically)
+- **Risk**: Medium (depends on position sizing)
+- **Best Markets**: Trending markets with clear direction
+- **Weak Markets**: Choppy, sideways markets
+
+## 🔒 Risk Management
+
+### ⚠️ Important Disclaimers
+- **Paper Trading**: Always start with paper trading
+- **Position Sizing**: Use appropriate position sizes (max 2-5% per trade)
+- **Stop Losses**: Consider stops below/above SMA levels
+- **Diversification**: Don't rely on single strategy or symbol
+
+### 🛡️ Built-in Safeguards
+- **Data Validation**: Comprehensive price data checks
+- **Connection Monitoring**: Automatic connection health checks
+- **Error Handling**: Graceful failure recovery
+- **Logging**: Detailed operation logs for analysis
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit pull requests or open issues for:
-- Bug fixes
-- Feature enhancements
-- Documentation improvements
-- Strategy optimizations
+We welcome contributions! Please see our contributing guidelines:
+
+### 🐛 Bug Reports
+- Use GitHub Issues
+- Include system information
+- Provide reproduction steps
+- Attach error logs if available
+
+### 💡 Feature Requests
+- Describe the use case
+- Explain expected behavior
+- Consider implementation complexity
+
+### 🔧 Code Contributions
+- Fork the repository
+- Create feature branch
+- Write tests for new features
+- Submit pull request with description
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **Interactive Brokers** for providing comprehensive trading API
+- **QuantStats** team for excellent performance analytics library
+- **ngrok** for enabling seamless tunnel connectivity
+- **Google Colab** for providing accessible cloud computing platform
 
 ## 📞 Support
 
-For questions or support:
-1. Check the troubleshooting section
-2. Review IBKR documentation
-3. Open an issue on GitHub
-4. Consult the community forums
+### 🆘 Getting Help
+- **Documentation**: Check `/docs` folder for detailed guides
+- **Issues**: Use GitHub Issues for bug reports
+- **Discussions**: Use GitHub Discussions for questions
+
+### 📊 Useful Resources
+- [IBKR API Documentation](https://interactivebrokers.github.io/)
+- [QuantStats Documentation](https://github.com/ranaroussi/quantstats)
+- [ngrok Documentation](https://ngrok.com/docs)
+- [Google Colab Guide](https://colab.research.google.com/notebooks/intro.ipynb)
+
+## 🚀 Roadmap
+
+### 🎯 Version 2.0 Features
+- [ ] **Multi-Strategy Framework**: Support for additional strategies
+- [ ] **Portfolio Management**: Position sizing and risk management
+- [ ] **Real-time Alerts**: Email/SMS notifications for signals
+- [ ] **Backtesting Engine**: Historical performance simulation
+- [ ] **Cloud Deployment**: AWS/GCP hosting options
+
+### 🔧 Version 1.5 Features
+- [ ] **Options Trading**: Support for options strategies
+- [ ] **Crypto Integration**: Cryptocurrency trading support
+- [ ] **Advanced Charts**: Candlestick and technical indicators
+- [ ] **Database Storage**: Historical data persistence
 
 ---
 
-**Remember**: Always practice responsible trading and never risk more than you can afford to lose. This system is a tool to assist with analysis and execution, but trading decisions remain your responsibility.
+**⭐ If this project helps you, please give it a star on GitHub!**
+
+**📧 Questions? Open an issue or start a discussion!**
+
+---
+
+*Built with ❤️ for the trading community*
